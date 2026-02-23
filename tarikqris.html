@@ -1,0 +1,475 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Deposit & Withdraw Full Processor</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 30px;
+        max-width: 1000px;
+        margin: auto;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 600;
+        color: #38bdf8;
+      }
+
+      section {
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+      }
+
+      label {
+        font-weight: 500;
+        display: block;
+        margin-bottom: 8px;
+        color: #94a3b8;
+      }
+
+      textarea {
+        width: 100%;
+        margin-bottom: 10px;
+        background: #0f172a;
+        color: #e2e8f0;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #38bdf8;
+        box-shadow: 0 0 5px #38bdf8;
+      }
+
+      /* Ukuran berbeda */
+      #inputData {
+        height: 100px;
+      }
+
+      #outputDeposit {
+        height: 70px;
+      }
+
+      #inputData,
+      #outputDeposit {
+        overflow-y: hidden;
+        resize: none;
+        scrollbar-width: thin; /* Firefox */
+      }
+
+      /* Show scroll only when focus */
+      #inputData:focus,
+      #outputDeposit:focus {
+        overflow-y: auto;
+      }
+      /* Chrome scrollbar styling (optional) */
+      #inputData:focus::-webkit-scrollbar,
+      #outputDeposit:focus::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      #inputData:focus::-webkit-scrollbar-thumb,
+      #outputDeposit:focus::-webkit-scrollbar-thumb {
+        background: #38bdf8;
+        border-radius: 6px;
+      }
+      #countDeposit,
+      #totalDeposit,
+      #totalWdDeposit,
+      #totalWdWithdraw {
+        height: 45px;
+        resize: none;
+        font-weight: bold;
+        text-align: center;
+        font-size: 15px;
+        background: #111827;
+      }
+
+      /* Tombol */
+      button {
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(56, 189, 248, 0.4);
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      /* SUMMARY GRID */
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+      }
+
+      .summary-box {
+        background: #111827;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      }
+
+      .summary-box label {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-bottom: 5px;
+      }
+
+      .summary-box textarea {
+        height: 35px !important;
+        resize: none;
+        text-align: center;
+        font-weight: bold;
+        font-size: 16px;
+        background: transparent;
+        border: none;
+        color: #38bdf8;
+      }
+
+      .summary-box button {
+        width: 100%;
+        margin-top: 5px;
+        font-size: 12px;
+        padding: 6px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div style="margin-bottom: 20px">
+      <a
+        href="hitungdpwd.html"
+        style="
+          display: inline-block;
+          background: #1a73e8;
+          color: #fff;
+          padding: 8px 15px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-size: 14px;
+          margin-right: 5px;
+        "
+      >
+        DP WD
+      </a>
+
+      <a
+        href="tarikqris.html"
+        style="
+          display: inline-block;
+          background: #1a73e8;
+          color: #fff;
+          padding: 8px 15px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-size: 14px;
+          margin-right: 5px;
+        "
+      >
+        TARIK QRIS
+      </a>
+
+      <a
+        href="phising.html"
+        style="
+          display: inline-block;
+          background: #1a73e8;
+          color: #fff;
+          padding: 8px 15px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-size: 14px;
+        "
+      >
+        PHISING
+      </a>
+
+      <a
+        href="pembulatan.html"
+        style="
+          display: inline-block;
+          background: #1a73e8;
+          color: #fff;
+          padding: 8px 15px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-size: 14px;
+        "
+      >
+        PEMBULATAN
+      </a>
+    </div>
+    <section
+      style="
+        background: #334155;
+        color: #e2e8f0;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      "
+    >
+      <h3 style="text-align: center; color: #38bdf8; margin-bottom: 10px">
+        Panduan Penggunaan
+      </h3>
+      <ol style="padding-left: 20px; line-height: 1.6; font-size: 14px">
+        <li>
+          <b>Tempel Data Excel:</b> Salin data dari Excel/CSV lalu tempel. Copy
+          mulai dari column <b>username</b> sampai column <b>withdraw</b>
+        </li>
+        <li>
+          <b>Proses Data:</b> Klik tombol <i>"Proses"</i> untuk memproses data.
+          Hasil deposit akan muncul di <i>"Hasil Tabel Deposit"</i>.
+        </li>
+      </ol>
+    </section>
+
+    <h2>Tarik QRIS Gampang ^^</h2>
+
+    <section>
+      <label>Tempel Data Excel (username sampai withdraw):</label>
+      <textarea id="inputData"></textarea>
+      <button onclick="processData()">Proses</button>
+    </section>
+
+    <section>
+      <label>Hasil Tabel Deposit (Tempel langsung ke sheet DP):</label>
+      <textarea id="outputDeposit" readonly></textarea>
+      <button onclick="copyText('outputDeposit')">Copy</button>
+    </section>
+    <section>
+      <div class="summary-grid">
+        <div class="summary-box">
+          <label>Total Form</label>
+          <textarea id="countDeposit" readonly></textarea>
+          <button onclick="copyText('countDeposit', this)">Copy</button>
+        </div>
+
+        <div class="summary-box">
+          <label>Total Deposit</label>
+          <textarea id="totalDeposit" readonly></textarea>
+          <button onclick="copyText('totalDeposit', this)">Copy</button>
+        </div>
+
+        <div class="summary-box">
+          <label>Potongan</label>
+          <textarea id="totalWdDeposit" readonly></textarea>
+          <button onclick="copyText('totalWdDeposit', this)">Copy</button>
+        </div>
+
+        <div class="summary-box">
+          <label>Penarikan Qris</label>
+          <textarea id="totalWdWithdraw" readonly></textarea>
+          <button onclick="copyText('totalWdWithdraw', this)">Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <label>Sheet PAY (Siap tempel ke masing-masing PAY)</label>
+      <textarea id="excelFormat" readonly style="height: 60px"></textarea>
+      <button onclick="copyExcelFormat(this)">Copy</button>
+    </section>
+
+    <section>
+      <label>BIAYA ADM (Siap tempel ke sheet WD)</label>
+      <textarea id="biayaAdmExcel" readonly style="height: 60px"></textarea>
+      <button onclick="copyBiayaAdmExcel(this)">Copy</button>
+    </section>
+
+    <section style="text-align: center">
+      <button
+        onclick="clearAll()"
+        style="background: linear-gradient(135deg, #dc2626, #f87171)"
+      >
+        Bersihkan Semua (Tekn)
+      </button>
+    </section>
+
+    <script>
+      let metodeList = [];
+      function processData() {
+        metodeList = [];
+
+        const input = document.getElementById("inputData").value.trim();
+        const lines = input.split(/\r?\n/);
+
+        let depositRows = [];
+        let totalDeposit = 0;
+        let totalWdDeposit = 0;
+        let totalWdWithdraw = 0;
+        let countDeposit = 0;
+
+        lines.forEach((line) => {
+          if (!line.trim()) return;
+
+          const cols = line
+            .split(/\t|\|/)
+            .map((c) => c.trim())
+            .filter((c) => c !== "");
+
+          if (cols.length < 2) return;
+
+          const lastNumber =
+            parseFloat(cols[cols.length - 1].replace(/,/g, "")) || 0;
+
+          if (/withdraw/i.test(line)) {
+            // Activity Withdraw
+            totalWdWithdraw += lastNumber;
+          } else if (/deposit/i.test(line)) {
+            // Activity Deposit
+
+            const username = cols[0];
+            const activity = cols[1];
+            const depo = parseFloat(cols[2].replace(/,/g, "")) || 0;
+            const wd = lastNumber;
+
+            totalDeposit += depo;
+            totalWdDeposit += wd;
+            countDeposit++;
+
+            const match = activity.match(/\(([^)]+)\)/);
+            const metode = match ? match[1] : activity;
+            if (!metodeList.includes(metode)) {
+              metodeList.push(metode);
+            }
+
+            const col2 = metode
+              .replace(/\s+/g, "")
+              .substring(0, 2)
+              .toUpperCase();
+
+            depositRows.push([metode, col2, username, depo].join("\t"));
+
+            // AUTO GENERATE SHEET PAY
+            const payFormat = `${totalDeposit}\t\t${totalWdWithdraw}\t${totalWdDeposit}\t${countDeposit}`;
+            document.getElementById("excelFormat").value = payFormat;
+
+            // AUTO GENERATE BIAYA ADM
+            if (metodeList.length > 0) {
+              const metode = metodeList[0];
+              const kode = metode
+                .replace(/\s+/g, "")
+                .substring(0, 3)
+                .toUpperCase();
+              const biayaAdmFormat = `BIAYA ADM ${metode}\t${kode}\t\t${totalWdDeposit}`;
+              document.getElementById("biayaAdmExcel").value = biayaAdmFormat;
+            }
+          }
+        });
+
+        document.getElementById("outputDeposit").value = depositRows.join("\n");
+        document.getElementById("totalDeposit").value =
+          totalDeposit.toLocaleString("en-US");
+        document.getElementById("countDeposit").value =
+          countDeposit.toLocaleString("en-US");
+        document.getElementById("totalWdDeposit").value =
+          totalWdDeposit.toLocaleString("en-US");
+        document.getElementById("totalWdWithdraw").value =
+          totalWdWithdraw.toLocaleString("en-US");
+      }
+
+      function copyText(id, btn) {
+        const el = document.getElementById(id);
+        let value = el.value;
+
+        // Summary hilangkan koma saat copy
+        if (id !== "outputDeposit") {
+          value = value.replace(/,/g, "");
+        }
+
+        navigator.clipboard.writeText(value);
+
+        // Efek tombol
+        const originalText = btn.innerText;
+        btn.innerText = "Copied ✓";
+        btn.style.background = "#16a34a";
+
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.style.background = "";
+        }, 1200);
+      }
+
+      function copyExcelFormat(btn) {
+        const value = document.getElementById("excelFormat").value;
+        navigator.clipboard.writeText(value);
+
+        const originalText = btn.innerText;
+        btn.innerText = "Copied ✓";
+        btn.style.background = "#16a34a";
+
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.style.background = "";
+        }, 1200);
+      }
+
+      function copyBiayaAdmExcel(btn) {
+        const value = document.getElementById("biayaAdmExcel").value;
+        navigator.clipboard.writeText(value);
+
+        const originalText = btn.innerText;
+        btn.innerText = "Copied ✓";
+        btn.style.background = "#16a34a";
+
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.style.background = "";
+        }, 1200);
+      }
+
+      function clearAll() {
+        // Kosongkan semua textarea
+        document.getElementById("inputData").value = "";
+        document.getElementById("outputDeposit").value = "";
+        document.getElementById("countDeposit").value = "";
+        document.getElementById("totalDeposit").value = "";
+        document.getElementById("totalWdDeposit").value = "";
+        document.getElementById("totalWdWithdraw").value = "";
+        document.getElementById("excelFormat").value = "";
+        document.getElementById("biayaAdmExcel").value = "";
+
+        // Reset array metode
+        metodeList = [];
+
+        // Scroll otomatis ke atas (smooth)
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+
+      // ESC langsung clear tanpa konfirmasi
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          clearAll();
+        }
+      });
+    </script>
+  </body>
+</html>
