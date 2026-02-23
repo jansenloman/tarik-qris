@@ -266,7 +266,7 @@
             .map((l) => l.trim())
             .filter((l) => l !== "")
             .forEach((line) => {
-              const m = line.match(/^([A-Z]+)\s+([\d,\.]+)$/i);
+              const m = line.match(/([A-Z]+PAY)\s+([\d,\.]+)/i);
               if (m) {
                 inputMap[m[1].toUpperCase()] =
                   parseInt(m[2].replace(/,/g, "").replace(/\./g, ""), 10) || 0;
@@ -386,3 +386,4 @@
     </script>
   </body>
 </html>
+
