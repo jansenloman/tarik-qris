@@ -1,0 +1,446 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Multi PAY Deposit Processor + Pencocokan</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 30px;
+        max-width: 1100px;
+        margin: auto;
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #38bdf8;
+      }
+      section {
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #94a3b8;
+      }
+      textarea,
+      input {
+        width: 100%;
+        background: #0f172a;
+        color: #e2e8f0;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 14px;
+        resize: none;
+        box-sizing: border-box;
+      }
+      input {
+        height: 30px;
+        font-weight: bold;
+        text-align: right;
+      }
+
+      #inputData:focus,
+      #outputDeposit:focus {
+        overflow-y: auto;
+      }
+
+      #inputData,
+      #outputDeposit {
+        overflow-y: hidden;
+        resize: none;
+        scrollbar-width: thin; /* Firefox */
+      }
+      button {
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+      button.copy-btn {
+        width: 100%;
+        margin-top: 6px;
+        font-size: 12px;
+        padding: 6px;
+      }
+      .summary-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 15px;
+      }
+      .summary-box,
+      .sheet-box {
+        background: #111827;
+        padding: 15px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+      .summary-box h4,
+      .sheet-box h4 {
+        color: #38bdf8;
+        margin-bottom: 8px;
+      }
+      #errorPencocokan {
+        color: #f87171;
+        font-weight: bold;
+        margin-top: 8px;
+      }
+      #sheetPayContainer {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="margin-bottom: 20px">
+      <a
+        href="../hitungdpwd.html"
+        style="
+          display: inline-block;
+          background: #1a73e8;
+          color: #fff;
+          padding: 8px 15px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-size: 14px;
+          margin-right: 5px;
+        "
+      >
+        DP WD
+      </a>
+
+      <a
+        href="tarikqrisv5.html"
+        style="
+          display: inline-block;
+          background: #1a73e8;
+          color: #fff;
+          padding: 8px 15px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-size: 14px;
+          margin-right: 5px;
+        "
+      >
+        TARIK QRIS
+      </a>
+
+      <a
+        href="../phising.html"
+        style="
+          display: inline-block;
+          background: #1a73e8;
+          color: #fff;
+          padding: 8px 15px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-size: 14px;
+        "
+      >
+        PHISING
+      </a>
+
+      <a
+        href="../pembulatan.html"
+        style="
+          display: inline-block;
+          background: #1a73e8;
+          color: #fff;
+          padding: 8px 15px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-size: 14px;
+        "
+      >
+        PEMBULATAN
+      </a>
+    </div>
+    <h2>TARIK QRIS MAKIN GAMPANG ^^</h2>
+
+    <section>
+      <label>Tempel Data (username | kodePAY | deposit)</label>
+      <textarea id="inputData" style="height: 120px"></textarea>
+      <button onclick="processData()">Proses</button>
+    </section>
+
+    <section>
+      <label>Output Deposit (Tempel ke Sheet DP)</label>
+      <textarea id="outputDeposit" style="height: 120px" readonly></textarea>
+      <button onclick="copyText('outputDeposit', this)">Copy</button>
+    </section>
+
+    <section>
+      <label>Summary Per PAY</label>
+      <div id="summaryContainer" class="summary-container"></div>
+    </section>
+
+    <section>
+      <label>Copy Mutasi Bank</label>
+      <textarea
+        id="pencocokanInput"
+        placeholder="Tempel data pencocokan di sini"
+        style="height: 150px"
+      ></textarea>
+      <button onclick="processPencocokan()">Proses Pencocokan</button>
+      <div id="errorPencocokan"></div>
+    </section>
+
+    <section>
+      <label>Masukkan Penarikan Qris (jika ada)</label>
+      <textarea
+        id="biayaAdmInputAll"
+        placeholder="Format: LNPAY 59290000&#10;ETPAY 70256000&#10;POPAY 54288000"
+        style="height: 100px"
+      ></textarea>
+      <button onclick="hitungBiayaAdmAll()">Hitung BIAYA ADM</button>
+    </section>
+
+    <section>
+      <label>BIAYA ADM (Hasil Semua PAY)</label>
+      <textarea id="biayaAdmOutput" readonly style="height: 120px"></textarea>
+      <button onclick="copyText('biayaAdmOutput', this)">Copy</button>
+    </section>
+
+    <section>
+      <label>Sheet PAY (Copy per PAY)</label>
+      <div id="sheetPayContainer" class="summary-container"></div>
+    </section>
+
+    <section style="text-align: center">
+      <button
+        onclick="clearAll()"
+        style="background: linear-gradient(135deg, #dc2626, #f87171)"
+      >
+        Bersihkan Semua (ESC)
+      </button>
+    </section>
+
+    <script>
+      let payGroups = {};
+      let pencocokanData = {};
+
+      // =================================================
+      // INPUT 1 — ASLI, TIDAK DIUBAH (TERMASUK outputDeposit)
+      // =================================================
+      function processData() {
+        const input = document.getElementById("inputData").value.trim();
+        const lines = input.split(/\r?\n/);
+        payGroups = {};
+
+        lines.forEach((line) => {
+          if (!line.trim()) return;
+          const cols = line
+            .split(/\t|\|/)
+            .map((c) => c.trim())
+            .filter((c) => c !== "");
+          if (cols.length < 3) return;
+          const username = cols[0],
+            kode = cols[1].toUpperCase(),
+            deposit = parseFloat(cols[2].replace(/,/g, "")) || 0;
+          if (!payGroups[kode])
+            payGroups[kode] = { totalDeposit: 0, count: 0, rows: [] };
+          payGroups[kode].totalDeposit += deposit;
+          payGroups[kode].count++;
+          payGroups[kode].rows.push(
+            [kode, kode.substring(0, 2), username, deposit].join("\t"),
+          );
+        });
+
+        // ⛔ INI TIDAK BOLEH BERUBAH
+        document.getElementById("outputDeposit").value = Object.values(
+          payGroups,
+        )
+          .flatMap((g) => g.rows)
+          .join("\n");
+
+        const summaryContainer = document.getElementById("summaryContainer");
+        summaryContainer.innerHTML = "";
+        Object.entries(payGroups).forEach(([kode, g]) => {
+          const div = document.createElement("div");
+          div.className = "summary-box";
+          div.innerHTML = `<h4>${kode}</h4>
+        <div>Total Form: ${g.count.toLocaleString()}</div>
+        <div>Total Deposit: ${g.totalDeposit.toLocaleString()}</div>`;
+          summaryContainer.appendChild(div);
+        });
+
+        document.getElementById("biayaAdmOutput").value = "";
+        document.getElementById("sheetPayContainer").innerHTML = "";
+        document.getElementById("sheetPayContainer").style.display = "none";
+      }
+
+      // =================================================
+      // MUTASI BANK — AMBIL [2] SAJA
+      // =================================================
+      function processPencocokan() {
+        const raw = document.getElementById("pencocokanInput").value.trim();
+        const lines = raw
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter(Boolean);
+        pencocokanData = {};
+
+        for (let i = 0; i < lines.length; i++) {
+          const m = lines[i].match(/\d+\s+([A-Z]+)\s+-/);
+          if (!m) continue;
+
+          const kode = m[1].toUpperCase();
+          const val2Line = lines[i + 2] || "";
+          const r2 = val2Line.match(/([\d,]+)\s*\(\d+\)/);
+          if (!r2) continue;
+
+          pencocokanData[kode] = parseInt(r2[1].replace(/\D/g, ""), 10);
+          i += 3;
+        }
+      }
+
+      // =================================================
+      // BIAYA ADM + SHEET PAY (FINAL, SESUAI MAU KAMU)
+      // =================================================
+      function hitungBiayaAdmAll() {
+        // QRIS — AKUMULASI
+        const qrisMap = {};
+        const raw = document.getElementById("biayaAdmInputAll").value || "";
+
+        raw
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter((l) => /PAY/i.test(l))
+          .forEach((line) => {
+            const m = line.match(/([A-Z]+PAY)\s+([\d,\.]+)/i);
+            if (!m) return;
+
+            const kode = m[1].toUpperCase();
+            const val = parseInt(m[2].replace(/\D/g, ""), 10) || 0;
+
+            if (!qrisMap[kode]) qrisMap[kode] = 0;
+            qrisMap[kode] += val;
+          });
+
+        // GABUNG SEMUA PAY
+        const allPay = new Set([
+          ...Object.keys(payGroups),
+          ...Object.keys(pencocokanData),
+          ...Object.keys(qrisMap),
+        ]);
+
+        const hasilAdm = [];
+        const sheet = document.getElementById("sheetPayContainer");
+        sheet.innerHTML = "";
+        sheet.style.display = "grid";
+
+        allPay.forEach((kode) => {
+          const totalDeposit = payGroups[kode]?.totalDeposit || 0;
+          const totalForm = payGroups[kode]?.count || 0;
+          const totalQris = qrisMap[kode] || 0;
+          const mutasiOut = pencocokanData[kode] || 0;
+
+          // 🔒 RUMUS DIKUNCI
+          const biayaFinal = mutasiOut - totalQris;
+
+          // BIAYA ADM
+          hasilAdm.push(
+            "BIAYA ADM " +
+              kode +
+              "\t" +
+              kode.substring(0, 3) +
+              "\t\t" +
+              biayaFinal,
+          );
+
+          // SHEET PAY — SELALU ADA
+          const sheetValue =
+            totalDeposit +
+            "\t\t" +
+            totalQris +
+            "\t" +
+            biayaFinal +
+            "\t" +
+            totalForm;
+
+          const div = document.createElement("div");
+          div.className = "sheet-box";
+
+          const valueEscaped = sheetValue.replace(/"/g, "&quot;");
+
+          div.innerHTML = `
+  <div style="margin-bottom:8px;">
+    <b>${kode}</b> &nbsp; ${sheetValue}
+  </div>
+  <button onclick="copySinglePay('${valueEscaped}', this)">
+    Copy
+  </button>
+`;
+
+          sheet.appendChild(div);
+        });
+
+        document.getElementById("biayaAdmOutput").value = hasilAdm.join("\n");
+      }
+
+      function copySinglePay(value, btn) {
+        navigator.clipboard.writeText(value);
+
+        if (btn) {
+          const original = btn.innerText;
+          btn.innerText = "Copied ✓";
+          btn.style.background = "#16a34a";
+
+          setTimeout(() => {
+            btn.innerText = original;
+            btn.style.background = "";
+          }, 1000);
+        }
+      }
+
+      function copyText(id, btn) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        navigator.clipboard.writeText(el.value);
+
+        if (btn) {
+          const original = btn.innerText;
+          btn.innerText = "Copied ✓";
+          btn.style.background = "#16a34a";
+
+          setTimeout(() => {
+            btn.innerText = original;
+            btn.style.background = "";
+          }, 1000);
+        }
+      }
+
+      function clearAll() {
+        document
+          .querySelectorAll("textarea,input")
+          .forEach((t) => (t.value = ""));
+        document.getElementById("summaryContainer").innerHTML = "";
+        document.getElementById("sheetPayContainer").innerHTML = "";
+        document.getElementById("sheetPayContainer").style.display = "none";
+        document.getElementById("biayaAdmOutput").value = "";
+        document.getElementById("errorPencocokan").innerHTML = "";
+        payGroups = {};
+        pencocokanData = {};
+
+        // Scroll otomatis ke atas (smooth)
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") clearAll();
+      });
+    </script>
+  </body>
+</html>
