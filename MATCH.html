@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pengecekan Data - Real-time</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", sans-serif;
+      }
+
+      body {
+        background-color: #121212;
+        color: #e0e0e0;
+        padding: 30px;
+      }
+
+      h2 {
+        margin-bottom: 15px;
+        color: #fff;
+      }
+
+      textarea {
+        width: 100%;
+        height: 150px;
+        padding: 12px;
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 8px;
+        color: #fff;
+        resize: none;
+        font-size: 14px;
+      }
+
+      .input-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      label {
+        width: 100px;
+        font-weight: 600;
+      }
+
+      input[type="text"] {
+        flex: 1;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #333;
+        background-color: #1e1e1e;
+        color: #fff;
+        font-size: 14px;
+        transition: 0.2s;
+        margin-right: 10px;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        border-color: #6200ee;
+        box-shadow: 0 0 5px #6200ee;
+      }
+
+      .status {
+        min-width: 200px;
+        font-weight: bold;
+      }
+
+      .match {
+        color: #00c853;
+      }
+      .mismatch {
+        color: #ff1744;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Paste Data Awal</h2>
+    <textarea
+      id="dataInput"
+      placeholder="Paste data di sini..."
+      autocomplete="off"
+    ></textarea>
+
+    <h2>Input Nilai User</h2>
+    <div id="dynamicInputs"></div>
+
+    <script>
+      const inputOrder = [
+        "HSPAY",
+        "VTPAY",
+        "LNPAY",
+        "POPAY",
+        "DNPAY",
+        "ETPAY",
+        "CSPAY",
+      ];
+      let originalData = {};
+
+      // Buat input field kosong sesuai urutan
+      const container = document.getElementById("dynamicInputs");
+
+      inputOrder.forEach((code) => {
+        const group = document.createElement("div");
+        group.className = "input-group";
+        group.innerHTML = `
+        <label for="${code}">${code}</label>
+        <input type="text" id="${code}" placeholder="Masukkan nilai untuk ${code}" autocomplete="off">
+        <div class="status" id="${code}-status"></div>
+    `;
+        container.appendChild(group);
+      });
+
+      // Normalize number untuk perbandingan
+      function normalizeNumber(str) {
+        return str.replace(/[.,]/g, "").trim();
+      }
+
+      // Parse textarea ke originalData
+      function parseOriginalData() {
+        const textarea = document.getElementById("dataInput").value.trim();
+        const lines = textarea.split("\n");
+        originalData = {};
+        lines.forEach((line) => {
+          const parts = line.trim().split(/\s+/);
+          if (parts.length >= 2) {
+            const code = parts[0].toUpperCase();
+            const value = parts.slice(1).join("");
+            originalData[code] = value;
+          }
+        });
+      }
+
+      // Fungsi update status untuk semua input
+      function updateAllStatus() {
+        inputOrder.forEach((code) => checkInput(code));
+      }
+
+      // Fungsi pengecekan satu input
+      function checkInput(code) {
+        parseOriginalData();
+        const userInput = document.getElementById(code).value;
+        const originalValue = originalData[code] || "";
+        const statusEl = document.getElementById(`${code}-status`);
+        if (!userInput) {
+          statusEl.textContent = "";
+          statusEl.className = "status";
+          return;
+        }
+        if (normalizeNumber(userInput) === normalizeNumber(originalValue)) {
+          statusEl.textContent = "✔ Cocok";
+          statusEl.className = "status match";
+        } else {
+          statusEl.textContent = `❌ Tidak cocok (Asli: ${originalValue})`;
+          statusEl.className = "status mismatch";
+        }
+      }
+
+      // Event listener untuk sesi 2
+      inputOrder.forEach((code) => {
+        document
+          .getElementById(code)
+          .addEventListener("input", () => checkInput(code));
+      });
+
+      // Event listener untuk textarea agar real-time update
+      document
+        .getElementById("dataInput")
+        .addEventListener("input", updateAllStatus);
+    </script>
+  </body>
+</html>
